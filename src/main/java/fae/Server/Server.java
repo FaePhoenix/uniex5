@@ -34,6 +34,17 @@ public class Server {
         this.socket = new ServerSocket(port);
         this.users = new ArrayList<User>();
         this.settings = new ServerSetting(ServerFolderLocation);
+
+        this.initializeServerLocation();
+    }
+
+
+    private void initializeServerLocation(){
+        FileHelper helper = new FileHelper();
+        String entryLocation = this.settings.getEntryListLocation();
+        if(helper.isValidFile(entryLocation)){
+            helper.readFile(entryLocation);
+        }
     }
 
 

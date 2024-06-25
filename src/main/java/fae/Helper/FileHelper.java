@@ -3,9 +3,7 @@ package fae.Helper;
 
 import java.io.File;
 import java.util.ArrayList;
-
 import org.json.JSONObject;
-
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -92,6 +90,34 @@ public class FileHelper {
             return true;
         } else {
             return false;
+        }
+    }
+
+    public void readFile(String fileName) {
+        this.setEmpty();
+        File openedFile = new File(fileName);
+
+        try {
+            //Prepare File reading
+            try (BufferedReader reader = new BufferedReader(new FileReader(openedFile))){
+                //Reading FileContent into Array
+                
+                String read = "";
+                while(read != null) {
+                    read = reader.readLine();
+                    this.content.add(read);
+                }
+
+                //remove null from fileContentArray
+                this.content.remove(content.size() - 1);
+            }
+        
+        //Handle Exceptions
+        } catch (NullPointerException | IOException exception) {
+        System.out.println("Encountered Error Opening File, object will be empty");
+        System.out.println(exception);
+        exception.printStackTrace();
+        this.setEmpty();
         }
     }
     

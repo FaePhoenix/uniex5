@@ -1,14 +1,13 @@
 package fae;
 
-import fae.Server.Server;
+import fae.Client.Client;
 
-public class App 
-{
+public class App2 {
     public static void main( String[] args )
     {   
         try  {
-            Server server = new Server(8080, "serverLocation");
-            server.start();
+            Client client = new Client();
+            client.connect(8080);
 
         } catch (Exception e) {
             e.printStackTrace();

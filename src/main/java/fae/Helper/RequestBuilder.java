@@ -14,7 +14,11 @@ public class RequestBuilder {
         FSUGenBank dataFile = new FSUGenBank(filename);
 
         JSONObject protocol = new JSONObject();
-        protocol.put("data_name", filename.substring("serverLocation/".length(), filename.length()));
+        String shortFilename = filename.replace("serverLocation/", "").replace(".txt", "");
+        protocol.put("data_name", shortFilename);
+
+        System.out.println("Got filename: " + filename);
+        System.out.println("Trimmed to: " + shortFilename);
 
         JSONObject dataBody = new JSONObject();
         dataBody.put("fasta", dataFile.getFasta().toJSON());
