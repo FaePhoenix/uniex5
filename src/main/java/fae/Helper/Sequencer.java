@@ -132,11 +132,11 @@ public class Sequencer {
         String firstChar = String.valueOf(sequence.charAt(0));
         StringBuilder mutated = new StringBuilder(sequence);
 
-        if (firstChar.equals("A")) {
-            mutated.setCharAt(0, 'T');
+        if (firstChar.equals("G")) {
+            mutated.setCharAt(0, 'C');
             return mutated.toString();
         } else {
-            mutated.setCharAt(0, 'A');
+            mutated.setCharAt(0, 'G');
             return mutated.toString();
         }
     }

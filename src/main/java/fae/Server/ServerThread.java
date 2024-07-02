@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import fae.Client.User;
 import fae.FSUGenBank.FSUGenBank;
 import fae.Helper.FileHelper;
+import fae.Helper.Levenshtein;
 import fae.Helper.ObjectParser;
 import fae.Helper.RequestBuilder;
 
@@ -75,6 +76,10 @@ public class ServerThread extends Thread{
                     this.sendUserRequestedEntry(clientRequest.getJSONObject("protocol_body").getString("data_name"));
                     break;
 
+                case "send_fasta":
+                    this.levenshteinstuffs(clientRequest.getJSONObject("protocol_body").getString("sequence"));
+                    break;
+
 
                 case "end_connection":
                     //Socket schließen
@@ -93,6 +98,58 @@ public class ServerThread extends Thread{
         }
     }
 
+
+    private void levenshteinstuffs(String seq) {
+
+        final int LEVENSHTEINCUTOFFVALUE = 5;
+
+        Levenshtein calc = new Levenshtein();
+        RequestBuilder protocolBuilder = new RequestBuilder();
+
+        String entryListLocation = this.settings.getEntryListLocation();
+        FileHelper helper = new FileHelper(entryListLocation);
+        JSONObject entryListFile = new JSONObject(String.join("", helper.getContent()));
+
+        int entries = entryListFile.getInt("amount");
+        JSONArray entrynames = entryListFile.getJSONArray("entries");
+
+        if (entries == 0) {
+            JSONObject doneprotocol = protocolBuilder.buildDoneSendingFastaResponse();
+            try {
+                this.out.writeUTF(doneprotocol.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        for (int idx = 0; idx < entries; idx ++){
+
+            String name = entrynames.getString(idx);
+            String filename = this.settings.getEntryFolder() + name;
+            FSUGenBank entry = new FSUGenBank(filename);
+            String entrySeq = entry.getFasta().getDnaSequence();
+            int distance = calc.calcdistance(seq, entrySeq);
+
+            if ( distance <= LEVENSHTEINCUTOFFVALUE) {
+                JSONObject sendprotocol = protocolBuilder.buildSendFastaResponseProtocol(entrySeq, distance, name);
+                try {
+                    this.out.writeUTF(sendprotocol.toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+                
+        }
+
+        JSONObject doneprotocol = protocolBuilder.buildDoneSendingFastaResponse();
+        try {
+            this.out.writeUTF(doneprotocol.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     private void sendSequences(JSONObject protocol_body) {
 

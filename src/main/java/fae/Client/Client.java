@@ -113,7 +113,7 @@ public class Client{
         Boolean alive = true;
         while(alive){
             System.out.println("Please Input your desired action:");
-            System.out.println("S (send data); R (request data); C (change password); D (dotplot); F (flip sequence); T (transcribe DNA to RNA);M (mutate Sequence); B (get complementary sequence); A (translate RNA to peptideChain); E (end connection)");
+            System.out.println("S (send data); R (request data); C (change password); D (dotplot); F (flip sequence); T (transcribe DNA to RNA);M (mutate Sequence); B (get complementary sequence); A (translate RNA to peptideChain); L (Levenshtein comparison); E (end connection)");
             String userAction = this.userInput.readLine();
             switch(userAction){
                 case "S":
@@ -148,7 +148,7 @@ public class Client{
                     break;
                 
                 case "M":
-                    this.flipSequence(); 
+                    this.mutate(); 
                     break;
 
                 case "B":
@@ -159,12 +159,70 @@ public class Client{
                     this.translateSequencetoAminoAcids();
                     break;
 
+                case "L":
+                    this.levenshteinComp();
+                    break;
+
                 default:
-                    System.out.println("Could not interpret Input. Please select an available action (S;R;C;D;F;T;M;B;A;E)");
+                    System.out.println("Could not interpret Input. Please select an available action (S;R;C;D;F;T;M;B;A;L;E)");
                     break;
             }
 
         }
+    }
+
+
+    private void levenshteinComp() throws IOException {
+
+        // Build helpers
+        RequestBuilder protocolBuilder = new RequestBuilder();
+        ObjectParser inStreamHelper = new ObjectParser();
+
+        //getFasta
+        System.out.println("Please select a fasta File you want to server to compare to known sequences");
+        String filename = getValidFilenameFromUser();
+        Fasta extrFasta = new Fasta(filename);
+
+        //send fasta to server
+        JSONObject sendFastaProtocol = protocolBuilder.buildSendFastaProtocol(extrFasta.getDnaSequence());
+        try {
+            this.out.writeUTF(sendFastaProtocol.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //get server repsonses
+        JSONObject response = inStreamHelper.handleRequest(this.in);
+
+        String protocol_type = response.getString("protocol_type");
+
+        if (protocol_type.equals("send_fasta_response_done")) {
+            System.out.println("Server has no entries to compare sent sequence with. Aborting");
+            return;
+        }
+
+        //REST EMPFANGEN UND AUFGEBEN MIT DOTPLOT UND SO TODO
+
+
+
+    }
+
+
+    private void mutate() {
+        // build helper
+        Sequencer seqHelper = new Sequencer();
+
+        // get file from user
+        System.out.println("Please select a fasta File you want to mutate");
+        String fileName = getValidFilenameFromUser();
+        Fasta givenFasta = new Fasta(fileName);
+
+        String mutSeq = seqHelper.mutateDNA(givenFasta.getDnaSequence());
+        Fasta mutFasta = new Fasta(givenFasta.getHeader() + "mutated", givenFasta.getComments(), mutSeq);
+
+        String newFilename = fileName.replaceAll(".txt", "") + "_mutated.txt";
+        mutFasta.saveToFile(newFilename);
+        System.out.println("Successfully build mutated sequence and saved as: " + newFilename);
     }
 
 

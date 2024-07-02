@@ -155,4 +155,33 @@ public class RequestBuilder {
         baseProtocol.put("protocol_type", protocolType);
         return baseProtocol;
     }
+
+
+    public JSONObject buildSendFastaProtocol(String dnaSequence) {
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "send_fasta");
+        JSONObject protocol = new JSONObject();
+
+        protocol.put("sequence", dnaSequence);
+        return baseProtocol;
+    }
+
+
+    public JSONObject buildDoneSendingFastaResponse() {
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "send_fasta_response_done");
+
+        return baseProtocol;
+    }
+
+
+    public JSONObject buildSendFastaResponseProtocol(String entrySeq, int distance, String name) {
+        JSONObject baseProtocol = this.baseProtocol("0.0.1", "send_fasta_response");
+        JSONObject protocol = new JSONObject();
+
+        protocol.put("distance", distance);
+        protocol.put("sequence", entrySeq);
+        protocol.put("name", name);
+
+        baseProtocol.put("protocol_body", protocol);
+        return baseProtocol;
+    }
 }

@@ -9,8 +9,8 @@ public class App
 {
     public static void main( String[] args )
     {   
-        //aufgabe5();
-        testing();
+        aufgabe5();
+        //testing();
 
     }
 
