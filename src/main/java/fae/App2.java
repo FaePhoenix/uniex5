@@ -8,6 +8,7 @@ public class App2 {
         try  {
             Client client = new Client();
             client.connect(8080);
+            client.run();
 
         } catch (Exception e) {
             e.printStackTrace();

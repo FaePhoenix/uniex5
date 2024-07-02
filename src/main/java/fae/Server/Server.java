@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Set;
-
 import org.json.JSONObject;
 
 import fae.Client.User;
@@ -35,7 +34,7 @@ public class Server {
         this.users = new ArrayList<User>();
         this.settings = new ServerSetting(ServerFolderLocation);
 
-        this.initializeServerLocation();
+        //this.initializeServerLocation();
     }
 
 

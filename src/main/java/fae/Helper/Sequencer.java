@@ -6,7 +6,7 @@ import java.util.HashMap;
 public class Sequencer {
 
     private HashMap<String, String> translation;
-    private HashMap<String, String> complementoryDNA;
+    private HashMap<String, String> complementaryDNA;
     private HashMap<String, String> DNAtoRNA;
     
     public Sequencer(){
@@ -97,12 +97,12 @@ public class Sequencer {
         this.translation.put("GGG", "G");
 
 
-        this.complementoryDNA = new HashMap<String, String>();
+        this.complementaryDNA = new HashMap<String, String>();
 
-        this.complementoryDNA.put("T", "A");
-        this.complementoryDNA.put("C", "G");
-        this.complementoryDNA.put("A", "T");
-        this.complementoryDNA.put("G", "C");
+        this.complementaryDNA.put("T", "A");
+        this.complementaryDNA.put("C", "G");
+        this.complementaryDNA.put("A", "T");
+        this.complementaryDNA.put("G", "C");
 
         this.DNAtoRNA = new HashMap<String, String>();
 
@@ -119,13 +119,13 @@ public class Sequencer {
     }
 
     public String buildComplementaryStrand(String sequence){
-        StringBuilder complementoryStrand = new StringBuilder();
+        StringBuilder complementaryStrand = new StringBuilder();
 
         for (char c : sequence.toCharArray()) {
-            complementoryStrand.append(this.complementoryDNA.get(String.valueOf(c)));
+            complementaryStrand.append(this.complementaryDNA.get(String.valueOf(c)));
         }
 
-        return complementoryStrand.toString();
+        return complementaryStrand.toString();
     }
 
     public String mutateDNA(String sequence) {

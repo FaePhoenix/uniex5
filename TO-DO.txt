@@ -3,9 +3,9 @@ let server initiate files
 
 do new tasks
 flip sequence - DONE
+transcript dna to rna - DONE
 dna to complementary bases - DONE
 mutate dna sequence - DONE
-transcript dna to rna - DONE
 translate rna to aminoacids - DONE
 
 hamming or levensthein distance

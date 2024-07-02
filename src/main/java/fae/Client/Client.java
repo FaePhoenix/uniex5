@@ -16,6 +16,7 @@ import fae.Fasta.Fasta;
 import fae.Helper.FileHelper;
 import fae.Helper.ObjectParser;
 import fae.Helper.RequestBuilder;
+import fae.Helper.Sequencer;
 
 
 
@@ -112,7 +113,7 @@ public class Client{
         Boolean alive = true;
         while(alive){
             System.out.println("Please Input your desired action:");
-            System.out.println("S (send data); R (request data); C (change password); D (dotplot); E (end connection)");
+            System.out.println("S (send data); R (request data); C (change password); D (dotplot); F (flip sequence); T (transcribe DNA to RNA);M (mutate Sequence); B (get complementary sequence); A (translate RNA to peptideChain); E (end connection)");
             String userAction = this.userInput.readLine();
             switch(userAction){
                 case "S":
@@ -138,8 +139,28 @@ public class Client{
                     this.handleDotPlot();
                     break;
 
+                case "F": 
+                    this.flipSequence();
+                    break;
+
+                case "T":
+                    this.transcribeDNA();
+                    break;
+                
+                case "M":
+                    this.flipSequence(); 
+                    break;
+
+                case "B":
+                    this.generateComplementarySequence();
+                    break;
+
+                case "A":
+                    this.translateSequencetoAminoAcids();
+                    break;
+
                 default:
-                    System.out.println("Could not interpret Input. Please select an available action (S;R;C;D;E)");
+                    System.out.println("Could not interpret Input. Please select an available action (S;R;C;D;F;T;M;B;A;E)");
                     break;
             }
 
@@ -147,18 +168,125 @@ public class Client{
     }
 
 
+    private void translateSequencetoAminoAcids() {
+        
+        // build helper
+        Sequencer seqHelper = new Sequencer();
+        
+        // get file from user
+        System.out.println("Please select a fasta File you want to translate into an peptide chain");
+        System.out.println("Note that this only works with RNA sequences and not DNA");
+        String fileName = getValidFilenameFromUser();
+        Fasta givenFasta = new Fasta(fileName);
+
+    
+        //Check if given sequence is RNA
+        String sequence = givenFasta.getDnaSequence();
+        if (! sequence.matches("[ACGU]*")) {
+            System.out.println("Did not get RNA sequence. Aborting");
+            return;
+        }
+
+        String peptideChain = seqHelper.translate(sequence);
+        String newFilename = "txtfiles/" + givenFasta.getHeader() + "_translated.txt";
+
+        ArrayList<String> content = new ArrayList<String>();
+        content.add(peptideChain);
+
+        FileHelper helper = new FileHelper(content);
+        helper.saveToFile(newFilename);
+        System.out.println("Successfully translated RNA sequence to peptide Chain and saved to: " + newFilename);
+    }
+
+
+    private void generateComplementarySequence() {
+        
+        // build helper
+        Sequencer seqHelper = new Sequencer();
+
+        // get file from user
+        System.out.println("Please select a fasta File you want to create the complementary sequence of");
+        System.out.println("Note that this only works with DNA sequences and not RNA");
+        String fileName = getValidFilenameFromUser();
+        Fasta givenFasta = new Fasta(fileName);
+
+        //Check if given sequence is DNA
+        String sequence = givenFasta.getDnaSequence();
+        if (! sequence.matches("[ACGT]*")) {
+            System.out.println("Did not get DNA sequence. Aborting");
+            return;
+        }
+        
+        String complSeq = seqHelper.buildComplementaryStrand(sequence);
+        Fasta complFasta = new Fasta(givenFasta.getHeader() + "complementary", givenFasta.getComments(), complSeq);
+        
+        String newFilename = fileName.replaceAll(".txt", "") + "_complementary.txt";
+        complFasta.saveToFile(newFilename);
+        System.out.println("Successfully build complementary sequence and saved as: " + newFilename);
+    }
+
+
+    private void transcribeDNA() {
+ 
+        // build helper
+        Sequencer seqHelper = new Sequencer();
+ 
+        // get file from user
+        System.out.println("Please select a fasta File you want to transcribe");
+        System.out.println("Note that this only works with DNA sequences and not RNA");
+        String fileName = getValidFilenameFromUser();
+        Fasta givenFasta = new Fasta(fileName);
+ 
+        //Check if given sequence is DNA
+        String sequence = givenFasta.getDnaSequence();
+        if (! sequence.matches("[ACGT]*")) {
+            System.out.println("Did not get DNA sequence. Aborting");
+            return;
+        }
+
+        String RNA = seqHelper.transcribe(sequence);
+        Fasta transcFasta = new Fasta(givenFasta.getHeader() + "transcribed", givenFasta.getComments(), RNA);
+
+        String newFilename = fileName.replaceAll(".txt", "") + "_transcribed.txt";
+        transcFasta.saveToFile(newFilename);
+        System.out.println("Successfully build complementary sequence and saved as: " + newFilename);
+    }
+
+
+    private void flipSequence() {
+
+        // build helper
+        Sequencer seqHelper = new Sequencer();
+
+        // get file from user
+        System.out.println("Please select a fasta File you want to reverse the sequence of");
+        String fileName = getValidFilenameFromUser();
+        Fasta givenFasta = new Fasta(fileName);
+
+        // generate Fasta w/ reverse sequence
+        String sequence = givenFasta.getDnaSequence();
+        String revSeq = seqHelper.reverseSequence(sequence);
+        Fasta revFasta = new Fasta(givenFasta.getHeader() + "reversed", givenFasta.getComments(), revSeq);
+
+        // save results to file
+        String newFilename = fileName.replaceAll(".txt", "") + "_reverse.txt";
+        revFasta.saveToFile(newFilename);
+        System.out.println("Successfully reversed sequence and saved as: " + newFilename);
+    }
+
+
     private void changePassword() throws IOException {
 
-        //Build helpers
+        // Build helpers
         RequestBuilder protocolBuilder = new RequestBuilder();
         ObjectParser inStreamHelper = new ObjectParser();
 
-        //Get new Password from user and send server the changing request
+        // Get new Password from user and send server the changing request
         String newPassword = getNewPasswordFromuser();
         JSONObject request = protocolBuilder.buildPasswordChangeProtocol(newPassword);
         out.writeUTF(request.toString());
 
-        //Check success of password change
+        // Check success of password change
         JSONObject serverResponse = inStreamHelper.handleInput(this.in, "change_password_response");
         Boolean success = serverResponse.getJSONObject("protocol_body").getBoolean("change_status");
         if(!success){
@@ -203,7 +331,7 @@ public class Client{
     private String getValidFilenameFromUser() {
 
         //Get input from user
-        System.out.println("Please enter the name of the file you want to send");
+        System.out.println("Please enter the name of the file you want to select");
         String fileName;
         try {
             fileName = userInput.readLine();
