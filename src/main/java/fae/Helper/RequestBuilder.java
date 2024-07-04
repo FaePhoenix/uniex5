@@ -162,6 +162,7 @@ public class RequestBuilder {
         JSONObject protocol = new JSONObject();
 
         protocol.put("sequence", dnaSequence);
+        baseProtocol.put("protocol_body", protocol);
         return baseProtocol;
     }
 

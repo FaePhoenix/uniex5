@@ -1,0 +1,4 @@
+>RNAExample
+;maja
+;uwe
+UUGCUUAGCC

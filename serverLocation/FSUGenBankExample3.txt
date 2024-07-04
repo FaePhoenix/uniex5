@@ -1,0 +1,11 @@
+4;5
+>fasta Headerc3
+;Moin
+;Comment -1
+;Comment 2.5!
+ATTTACGGTC
+AC  7
+SV  no
+OS  Wurm
+KW  bro
+DE  neni

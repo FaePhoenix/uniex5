@@ -1,0 +1,4 @@
+>DNAExample
+;maja
+;uwe
+ATTTACGGTC

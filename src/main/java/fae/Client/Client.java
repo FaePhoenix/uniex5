@@ -176,7 +176,6 @@ public class Client{
 
         // Build helpers
         RequestBuilder protocolBuilder = new RequestBuilder();
-        ObjectParser inStreamHelper = new ObjectParser();
 
         //getFasta
         System.out.println("Please select a fasta File you want to server to compare to known sequences");
@@ -192,19 +191,52 @@ public class Client{
         }
 
         //get server repsonses
-        JSONObject response = inStreamHelper.handleRequest(this.in);
-
-        String protocol_type = response.getString("protocol_type");
-
-        if (protocol_type.equals("send_fasta_response_done")) {
+        ArrayList<JSONObject> serverResponses = recieveLevResponse();
+    
+        if (serverResponses.size() == 0) {
             System.out.println("Server has no entries to compare sent sequence with. Aborting");
             return;
         }
 
-        //REST EMPFANGEN UND AUFGEBEN MIT DOTPLOT UND SO TODO
+        for (int idx = 0; idx < serverResponses.size(); idx++) {
+            JSONObject response = serverResponses.get(idx);
+            int distance = response.getInt("distance");
+            String name = response.getString("name");
+            String sequence = response.getString("sequence");
 
+            System.out.println("Candidate " + idx+1 + ": " + name);
+            System.out.println("Found distance of " + distance);
+            System.out.println("Printing dotplot:");
 
+            Fasta sent = new Fasta(name, new ArrayList<String>(), sequence);
+            extrFasta.sequenceComparison(sent);
 
+            System.out.println("\n\n");
+
+        }
+
+        System.out.println("finished printing dotplots");
+    }
+
+    private ArrayList<JSONObject> recieveLevResponse() throws IOException {
+
+        //build helper
+        ObjectParser inStreamHelper = new ObjectParser();
+
+        //initialize
+        ArrayList<JSONObject> responses = new ArrayList<JSONObject>();
+        String latest_type = "";
+
+        while (!latest_type.equals("send_fasta_response_done")) {
+            JSONObject response = inStreamHelper.handleRequest(this.in);
+            latest_type = response.getString("protocol_type");
+
+            if(latest_type.equals("send_fasta_response")){
+                responses.add(response);
+            }
+        }
+
+        return responses;
     }
 
 
